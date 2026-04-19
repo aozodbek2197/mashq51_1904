@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1. Infinite Scroll Gallery</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f4f4f4; }
+    .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
+    .card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .card img { width: 100%; height: 250px; object-fit: cover; }
+    .card p { padding: 10px; margin: 0; text-align: center; }
+    .loader { text-align: center; padding: 20px; font-size: 18px; }
+  </style>
+</head>
+<body>
+  <h1>Infinite Scroll Gallery</h1>
+  <div class="gallery" id="gallery"></div>
+  <div class="loader" id="loader">Yuklanmoqda...</div>
+
+  <script>
+    const gallery = document.getElementById('gallery');
+    const loader = document.getElementById('loader');
+    let page = 1;
+    const imagesPerPage = 8;
+
+    const imageList = Array.from({length: 100}, (_, i) => ({
+      url: `https://picsum.photos/id/${i + 10}/800/600`,
+      title: `Rasm ${i + 1}`
+    }));
+
+    function loadImages() {
+      loader.style.display = 'block';
+      setTimeout(() => {
+        const start = (page - 1) * imagesPerPage;
+        const end = start + imagesPerPage;
+        const newImages = imageList.slice(start, end);
+
+        newImages.forEach(img => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <img src="${img.url}" loading="lazy" alt="${img.title}">
+            <p>${img.title}</p>
+          `;
+          gallery.appendChild(card);
+        });
+
+        page++;
+        loader.style.display = 'none';
+      }, 800);
+    }
+
+    // Intersection Observer
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) {
+        loadImages();
+      }
+    }, { threshold: 0.5 });
+
+    observer.observe(loader);
+
+    // Birinchi yuklash
+    loadImages();
+  </script>
+</body>
+</html>
